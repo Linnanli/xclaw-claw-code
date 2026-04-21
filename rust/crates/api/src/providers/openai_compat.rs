@@ -689,6 +689,11 @@ struct ChatMessage {
     role: String,
     #[serde(default)]
     content: Option<String>,
+    /// DashScope/Qwen/GLM/DeepSeek 系列在 `reasoning_content` 里返回
+    /// native thinking chain（content 可能为 null）。我们把它提升为
+    /// `OutputContentBlock::Thinking`，由调用方决定如何呈现。
+    #[serde(default)]
+    reasoning_content: Option<String>,
     #[serde(default)]
     tool_calls: Vec<ResponseToolCall>,
 }
@@ -1182,6 +1187,19 @@ fn normalize_response(
             "chat completion response missing choices",
         ))?;
     let mut content = Vec::new();
+    // DashScope/Qwen/GLM/DeepSeek: `reasoning_content` 是独立字段；如果存在非空
+    // 值，就把它提升为 Anthropic-兼容的 Thinking block 放在 content 最前面，
+    // 让调用方（例如 ironclaw）能在下游 UI/pipeline 里统一处理。
+    if let Some(reasoning) = choice
+        .message
+        .reasoning_content
+        .filter(|value| !value.is_empty())
+    {
+        content.push(OutputContentBlock::Thinking {
+            thinking: reasoning,
+            signature: None,
+        });
+    }
     if let Some(text) = choice.message.content.filter(|value| !value.is_empty()) {
         content.push(OutputContentBlock::Text { text });
     }
