@@ -30,6 +30,7 @@ pub mod permission_enforcer;
 mod permissions;
 pub mod plugin_lifecycle;
 mod policy_engine;
+mod prompt;
 pub mod recovery_recipes;
 mod remote;
 pub mod sandbox;
@@ -127,6 +128,10 @@ pub use plugin_lifecycle::{
 pub use policy_engine::{
     evaluate, DiffScope, GreenLevel, LaneBlocker, LaneContext, PolicyAction, PolicyCondition,
     PolicyEngine, PolicyRule, ReconcileReason, ReviewStatus,
+};
+pub use prompt::{
+    load_system_prompt, prepend_bullets, ContextFile, ProjectContext, PromptBuildError,
+    SystemPromptBuilder, FRONTIER_MODEL_NAME, SYSTEM_PROMPT_DYNAMIC_BOUNDARY,
 };
 pub use recovery_recipes::{
     attempt_recovery, recipe_for, EscalationPolicy, FailureScenario, RecoveryContext,
